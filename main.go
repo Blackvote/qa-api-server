@@ -26,6 +26,8 @@ func main() {
 	user := os.Getenv("POSTGRES_USER")
 	pass := os.Getenv("POSTGRES_PASSWORD")
 	dbName := os.Getenv("POSTGRES_DB")
+	host := os.Getenv("POSTGRES_HOST")
+	port := os.Getenv("POSTGRES_PORT")
 
 	if user == "" {
 		user = "qa_user"
@@ -36,12 +38,9 @@ func main() {
 	if dbName == "" {
 		dbName = "qa_db"
 	}
-
-	host := os.Getenv("POSTGRES_HOST")
 	if host == "" {
 		host = "localhost"
 	}
-	port := os.Getenv("POSTGRES_PORT")
 	if port == "" {
 		port = "5432"
 	}
