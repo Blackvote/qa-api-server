@@ -37,14 +37,23 @@ func main() {
 		dbName = "qa_db"
 	}
 
+	host := os.Getenv("POSTGRES_HOST")
+	if host == "" {
+		host = "localhost"
+	}
+	port := os.Getenv("POSTGRES_PORT")
+	if port == "" {
+		port = "5432"
+	}
+
 	dsn := fmt.Sprintf(
-		"postgres://%s:%s@localhost:5432/%s?sslmode=disable",
-		user, pass, dbName,
+		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		user, pass, host, port, dbName,
 	)
 
-	log.Printf("Starting QA API service...")
+	log.Printf("Starting QA API service")
 
-	log.Printf("Running migrations...")
+	log.Printf("Running migrations")
 	if err := runMigrations(dsn, *resetDB); err != nil {
 		log.Fatalf("Migrations failed: %v", err)
 	}

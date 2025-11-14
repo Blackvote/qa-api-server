@@ -68,10 +68,10 @@ func handleCreateAnswerForQuestion(db *gorm.DB, w http.ResponseWriter, r *http.R
 	if err := db.First(&q, questionID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			log.Printf("Question not found: id=%d", questionID)
-			http.Error(w, "question not found", http.StatusNotFound)
+			http.Error(w, "question not found", http.StatusBadRequest)
 		} else {
-			log.Printf("DB error loading question: %v", err)
-			http.Error(w, "failed to load question", http.StatusInternalServerError)
+			log.Printf("DB error loading question for answer create: %v", err)
+			http.Error(w, "cannot find question(lost db conn?)", http.StatusBadRequest)
 		}
 		return
 	}
@@ -125,6 +125,12 @@ func handleQuestionCreate(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if strings.TrimSpace(body.Text) == "" {
+		log.Printf("Validation error: empty question text")
+		http.Error(w, "required text field", http.StatusBadRequest)
+		return
+	}
+
 	q := Question{
 		Text:      body.Text,
 		CreatedAt: time.Now(),
@@ -159,6 +165,7 @@ func handleQuestionsList(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(qs)
 }
 
+// cascade реализован логикой SQL (ON DELETE ASCADE)
 func handleQuestionDelete(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 
 	trimQ := strings.TrimPrefix(r.URL.Path, "/questions/")

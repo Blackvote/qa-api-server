@@ -62,6 +62,18 @@ func handleAnswerCreate(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var q Question
+	if err := db.First(&q, body.QuestionID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Printf("Question not found for answer create: id=%d", body.QuestionID)
+			http.Error(w, "question not found", http.StatusBadRequest)
+		} else {
+			log.Printf("DB error loading question for answer create: %v", err)
+			http.Error(w, "cannot find question(lost db conn?)", http.StatusBadRequest)
+		}
+		return
+	}
+
 	a := Answer{
 		QuestionID: body.QuestionID,
 		UserID:     body.UserID,
